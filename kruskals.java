@@ -1,84 +1,112 @@
-import java.util.Scanner;
+import java.util.*;
 
-public class kruskal {
-    int parent[] = new int[10];
+class Edge {
 
-    int find(int m) {
-        int p = m;
-        while (parent[p] != 0)
-            p = parent[p];
-        return p;
+    int src;
+    int dest;
+    int weight;
+
+    Edge(int src, int dest, int weight) {
+        this.src = src;
+        this.dest = dest;
+        this.weight = weight;
+    }
+}
+
+class Solution {
+
+    static int parent[];
+
+    // Find Parent
+    static int find(int x) {
+
+        if (parent[x] == x)
+            return x;
+
+        return parent[x] = find(parent[x]);
     }
 
-    void union(int i, int j) {
-        if (i < j)
-            parent[i] = j;
-        else
-            parent[j] = i;
+    // Union
+    static void union(int u, int v) {
+
+        int pu = find(u);
+        int pv = find(v);
+
+        parent[pu] = pv;
     }
 
-    void krkl(int[][] a, int n) {
-        int u = 0, v = 0, min, k = 0, i, j, sum = 0;
+    static int kruskal(int V, int[][] graph) {
 
-        // Initialize parent array
-        for (i = 1; i <= n; i++)
-            parent[i] = 0;
+        PriorityQueue<Edge> pq =
+                new PriorityQueue<Edge>((x, y) -> x.weight - y.weight);
 
-        while (k < n - 1) {
-            min = Integer.MAX_VALUE;
-            u = -1;
-            v = -1;
+        // Store all edges in PQ
+        for (int i = 0; i < V; i++) {
 
-            // Find minimum edge
-            for (i = 1; i <= n; i++) {
-                for (j = 1; j <= n; j++) {
-                    if (i != j && a[i][j] < min) {
-                        min = a[i][j];
-                        u = i;
-                        v = j;
-                    }
+            for (int j = i + 1; j < V; j++) {
+
+                if (graph[i][j] != 0) {
+
+                    pq.add(new Edge(i, j, graph[i][j]));
                 }
             }
-
-            // If no edge found → break
-            if (u == -1 || v == -1)
-                break;
-
-            i = find(u);
-            j = find(v);
-
-            if (i != j) {
-                union(i, j);
-                System.out.println("(" + u + "," + v + ") = " + min);
-                sum = sum + min;
-                k++;
-            }
-
-            // Remove edge so it's not picked again
-            a[u][v] = a[v][u] = Integer.MAX_VALUE;
         }
 
-        if (k != n - 1)
-            System.out.println("No spanning tree");
-        else
-            System.out.println("The cost of minimum spanning tree = " + sum);
+        // Parent initialization
+        parent = new int[V];
+
+        for (int i = 0; i < V; i++) {
+            parent[i] = i;
+        }
+
+        int sum = 0;
+
+        System.out.println("Edges in MST:");
+
+        while (pq.size() > 0) {
+
+            Edge e = pq.remove();
+
+            int u = e.src;
+            int v = e.dest;
+            int wt = e.weight;
+
+            // If cycle not formed
+            if (find(u) != find(v)) {
+
+                union(u, v);
+
+                System.out.println(u + " -> " + v + " = " + wt);
+
+                sum += wt;
+            }
+        }
+
+        return sum;
     }
 
     public static void main(String[] args) {
-        int a[][] = new int[10][10];
-        int i, j;
 
-        System.out.println("Enter the number of vertices of the graph");
         Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
 
-        System.out.println("Enter the weighted matrix");
-        for (i = 1; i <= n; i++)
-            for (j = 1; j <= n; j++)
-                a[i][j] = sc.nextInt();
+        System.out.println("Enter number of vertices:");
+        int V = sc.nextInt();
 
-        kruskal k = new kruskal();
-        k.krkl(a, n);
+        int graph[][] = new int[V][V];
+
+        System.out.println("Enter adjacency matrix:");
+
+        for (int i = 0; i < V; i++) {
+
+            for (int j = 0; j < V; j++) {
+
+                graph[i][j] = sc.nextInt();
+            }
+        }
+
+        int ans = kruskal(V, graph);
+
+        System.out.println("Minimum Cost = " + ans);
 
         sc.close();
     }
