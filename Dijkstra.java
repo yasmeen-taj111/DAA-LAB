@@ -1,18 +1,71 @@
-import java.util.Scanner;
+import java.util.*;
 
-public class DijkstraSimple {
+class Solution {
+
+    class Pair {
+        int node, dist;
+
+        Pair(int node, int dist) {
+            this.node = node;
+            this.dist = dist;
+        }
+    }
+
+    public void dijkstra(int[][] graph, int src, int n) {
+
+        PriorityQueue<Pair> pq =
+                new PriorityQueue<>((x, y) -> x.dist - y.dist);
+
+        int[] dist = new int[n];
+
+        Arrays.fill(dist, (int)(1e9));
+
+        dist[src] = 0;
+
+        pq.add(new Pair(src, 0));
+
+        while (!pq.isEmpty()) {
+
+            Pair it = pq.poll();
+
+            int u = it.node;
+            int dis = it.dist;
+
+            for (int v = 0; v < n; v++) {
+
+                // edge exists
+                if (graph[u][v] != 0) {
+
+                    // relaxation
+                    if (dis + graph[u][v] < dist[v]) {
+
+                        dist[v] = dis + graph[u][v];
+
+                        pq.add(new Pair(v, dist[v]));
+                    }
+                }
+            }
+        }
+
+        // printing answer
+        System.out.println("Shortest distances from source " + src);
+
+        for (int i = 0; i < n; i++) {
+            System.out.println(src + " -> " + i + " = " + dist[i]);
+        }
+    }
 
     public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
 
-        int n;
         System.out.println("Enter number of vertices:");
-        n = sc.nextInt();
+        int n = sc.nextInt();
 
         int[][] graph = new int[n][n];
 
-        System.out.println("Enter adjacency matrix:");
+        System.out.println("Enter weighted adjacency matrix:");
+
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 graph[i][j] = sc.nextInt();
@@ -22,46 +75,9 @@ public class DijkstraSimple {
         System.out.println("Enter source vertex:");
         int src = sc.nextInt();
 
-        int[] dist = new int[n];     
-        boolean[] visited = new boolean[n];
+        Solution obj = new Solution();
 
-      
-        for (int i = 0; i < n; i++) {
-            dist[i] = 999;   // infinity
-            visited[i] = false;
-        }
-
-        dist[src] = 0;
-
-       
-        for (int i = 0; i < n - 1; i++) {
-
-            int min = 999, u = -1;
-
-         
-            for (int j = 0; j < n; j++) {
-                if (!visited[j] && dist[j] < min) {
-                    min = dist[j];
-                    u = j;
-                }
-            }
-
-            visited[u] = true;
-
-            for (int v = 0; v < n; v++) {
-                if (!visited[v] && graph[u][v] != 0 &&
-                        dist[u] + graph[u][v] < dist[v]) {
-
-                    dist[v] = dist[u] + graph[u][v];
-                }
-            }
-        }
-
-
-        System.out.println("Shortest distances from source:");
-        for (int i = 0; i < n; i++) {
-            System.out.println("To " + i + " = " + dist[i]);
-        }
+        obj.dijkstra(graph, src, n);
 
         sc.close();
     }
