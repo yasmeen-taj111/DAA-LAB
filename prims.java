@@ -1,74 +1,95 @@
-import java.util.Scanner;
+import java.util.*;
 
-public class prims {
-    public static void main(String[] args) {
-        int w[][] = new int[10][10];
-        int n, i, j, s, k = 0;
-        int min;
+class Pair {
+
+    int node;
+    int distance;
+    int parent;
+
+    Pair(int distance, int node, int parent) {
+        this.node = node;
+        this.distance = distance;
+        this.parent = parent;
+    }
+}
+
+class Solution {
+
+    static int prims(int V, int[][] graph, int src) {
+
+        PriorityQueue<Pair> pq =
+                new PriorityQueue<Pair>((x, y) -> x.distance - y.distance);
+
+        int vis[] = new int[V];
+
+        // {weight, node, parent}
+        pq.add(new Pair(0, src, -1));
+
         int sum = 0;
-        int u = 0, v = 0;
-        int flag = 0;
-        int sol[] = new int[10];
 
-        System.out.println("Enter the number of vertices");
-        Scanner sc = new Scanner(System.in);
-        n = sc.nextInt();
+        System.out.println("Edges in MST:");
 
-        // Initialize solution array
-        for (i = 1; i <= n; i++)
-            sol[i] = 0;
+        while (pq.size() > 0) {
 
-        System.out.println("Enter the weighted graph");
-        for (i = 1; i <= n; i++)
-            for (j = 1; j <= n; j++)
-                w[i][j] = sc.nextInt();
+            int wt = pq.peek().distance;
+            int node = pq.peek().node;
+            int parent = pq.peek().parent;
 
-        System.out.println("Enter the source vertex");
-        s = sc.nextInt();
+            pq.remove();
 
-        sol[s] = 1; // mark source as visited
-        k = 1;
+            // Skip if already visited
+            if (vis[node] == 1)
+                continue;
 
-        while (k <= n - 1) {
-            min = Integer.MAX_VALUE;
-            u = -1;
-            v = -1;
+            vis[node] = 1;
+            sum += wt;
 
-            for (i = 1; i <= n; i++) {
-                for (j = 1; j <= n; j++) {
-                    if (sol[i] == 1 && sol[j] == 0) {
-                        if (i != j && w[i][j] < min) {
-                            min = w[i][j];
-                            u = i;
-                            v = j;
-                        }
-                    }
+            // Print MST edge
+            if (parent != -1) {
+                System.out.println(parent + " -> " + node + " = " + wt);
+            }
+
+            // Traverse neighbours
+            for (int adjNode = 0; adjNode < V; adjNode++) {
+
+                if (graph[node][adjNode] != 0 &&
+                        vis[adjNode] == 0) {
+
+                    pq.add(new Pair(graph[node][adjNode],
+                            adjNode,
+                            node));
                 }
             }
-
-            // If no edge found → graph disconnected
-            if (v == -1) {
-                break;
-            }
-
-            sol[v] = 1;
-            sum = sum + min;
-            k++;
-
-            System.out.println(u + "->" + v + "=" + min);
         }
 
-        // Check if all vertices are included
-        for (i = 1; i <= n; i++) {
-            if (sol[i] == 0) {
-                flag = 1;
+        return sum;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Enter number of vertices:");
+        int V = sc.nextInt();
+
+        int graph[][] = new int[V][V];
+
+        System.out.println("Enter adjacency matrix:");
+
+        for (int i = 0; i < V; i++) {
+
+            for (int j = 0; j < V; j++) {
+
+                graph[i][j] = sc.nextInt();
             }
         }
 
-        if (flag == 1)
-            System.out.println("No spanning tree");
-        else
-            System.out.println("The cost of minimum spanning tree is " + sum);
+        System.out.println("Enter source vertex:");
+        int src = sc.nextInt();
+
+        int ans = prims(V, graph, src);
+
+        System.out.println("Minimum Cost = " + ans);
 
         sc.close();
     }
