@@ -2,72 +2,74 @@ import java.util.*;
 
 public class TopologicalSort {
 
-    private int V; // number of vertices
-    private List<Integer> adjList[];
-
-    // Constructor
-    public TopologicalSort(int v) {
-        V = v;
-        adjList = new LinkedList[v];
-        for (int i = 0; i < v; i++) {
-            adjList[i] = new LinkedList<>();
-        }
-    }
-
-    // Add edge
-    private void addEdge(int v, int w) {
-        adjList[v].add(w);
-    }
-
     // DFS function
-    private void topologicalSortUtil(int v, boolean visited[], Stack<Integer> stack) {
-        visited[v] = true;
+    static void dfs(int node, int vis[], Stack<Integer> st,
+                    ArrayList<ArrayList<Integer>> adj) {
 
-        for (Integer neighbor : adjList[v]) {
-            if (!visited[neighbor]) {
-                topologicalSortUtil(neighbor, visited, stack);
+        vis[node] = 1;
+
+        // Visit all neighbors
+        for (int it : adj.get(node)) {
+            if (vis[it] == 0) {
+                dfs(it, vis, st, adj);
             }
         }
 
-        stack.push(v); // push after visiting neighbors
+        // Push after visiting all neighbors
+        st.push(node);
     }
 
-    // Topological Sort
-    private void topologicalSort() {
-        Stack<Integer> stack = new Stack<>();
-        boolean visited[] = new boolean[V];
+    // Topological Sort function
+    static void topoSort(int V, ArrayList<ArrayList<Integer>> adj) {
 
+        int vis[] = new int[V];
+        Stack<Integer> st = new Stack<>();
+
+        // Call DFS for all vertices
         for (int i = 0; i < V; i++) {
-            if (!visited[i]) {
-                topologicalSortUtil(i, visited, stack);
+            if (vis[i] == 0) {
+                dfs(i, vis, st, adj);
             }
         }
 
-        // Print result
-        System.out.println("Topological Sort:");
-        while (!stack.isEmpty()) {
-            System.out.print(stack.pop() + " ");
+        // Print answer
+        System.out.println("Topological Order:");
+
+        while (!st.isEmpty()) {
+            System.out.print(st.pop() + " ");
         }
     }
 
-    public static void main(String args[]) {
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter number of vertices: ");
-        int V = scanner.nextInt();
+        int V = sc.nextInt();
 
-        TopologicalSort g = new TopologicalSort(V);
+        // Create adjacency list
+        ArrayList<ArrayList<Integer>> adj = new ArrayList<>();
 
+        for (int i = 0; i < V; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        // Input adjacency matrix
         System.out.println("Enter adjacency matrix:");
+
         for (int i = 0; i < V; i++) {
             for (int j = 0; j < V; j++) {
-                if (scanner.nextInt() == 1) {
-                    g.addEdge(i, j);
+
+                int x = sc.nextInt();
+
+                if (x == 1) {
+                    adj.get(i).add(j);
                 }
             }
         }
 
-        g.topologicalSort();
-        scanner.close();
+        topoSort(V, adj);
+
+        sc.close();
     }
 }
